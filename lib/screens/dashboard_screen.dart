@@ -31,11 +31,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final ses  = await ApiService.get('/sesiones')  as List;
       if (mounted) {
         setState(() {
-          _categorias = cats.length;
-          _jugadores  = jugs.length;
-          _sesiones   = ses.length;
+          _categorias      = cats.length;
+          _jugadores       = jugs.length;
+          _sesiones        = ses.length;
           _ultimasSesiones = ses.take(3).toList();
-          _loading = false;
+          _loading         = false;
         });
       }
     } on ApiException catch (e) {
@@ -54,30 +54,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (mounted) Navigator.pushReplacementNamed(context, '/login');
   }
 
+  // ── helpers ──────────────────────────────────────────────────────────────
+  String _fechaHoy() {
+    const dias   = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+    const meses  = ['enero','febrero','marzo','abril','mayo','junio',
+                    'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    final now = DateTime.now();
+    final dia = dias[now.weekday - 1];
+    return '${dia[0].toUpperCase()}${dia.substring(1)}, ${now.day} de ${meses[now.month - 1]}';
+  }
+
+  // ── build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final usuario = context.watch<AuthProvider>().usuario;
     final nombre  = usuario?['nombre'] ?? '';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF0F2F5),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildSkeleton()
           : RefreshIndicator(
               onRefresh: _load,
+              color: const Color(0xFFE65100),
               child: CustomScrollView(
                 slivers: [
                   _buildHeader(nombre),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         const SizedBox(height: 20),
                         _buildStats(),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
                         _buildQuickActions(),
                         if (_ultimasSesiones.isNotEmpty) ...[
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 28),
                           _buildUltimasSesiones(),
                         ],
                       ]),
@@ -89,11 +101,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // ── skeleton while loading ────────────────────────────────────────────────
+  Widget _buildSkeleton() {
+    return Column(
+      children: [
+        Container(
+          height: 200,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFE65100), Color(0xFFBF360C)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: List.generate(3, (_) => Expanded(
+              child: Container(
+                margin: const EdgeInsets.only(right: 10),
+                height: 90,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            )),
+          ),
+        ),
+        const SizedBox(height: 24),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: CircularProgressIndicator(color: Color(0xFFE65100)),
+        ),
+      ],
+    );
+  }
+
+  // ── header ────────────────────────────────────────────────────────────────
   Widget _buildHeader(String nombre) {
     return SliverAppBar(
-      expandedHeight: 160,
+      expandedHeight: 180,
       pinned: true,
       backgroundColor: const Color(0xFFE65100),
+      elevation: 0,
       actions: [
         IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
@@ -107,87 +160,152 @@ class _DashboardScreenState extends State<DashboardScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFFE65100), Color(0xFFBF360C)],
+              colors: [Color(0xFFE65100), Color(0xFF8D1F00)],
             ),
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Row(
+          child: Stack(
+            children: [
+              // Decoración de fondo: círculos sutiles
+              Positioned(
+                right: -30,
+                top: -30,
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.06),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 40,
+                bottom: -20,
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.05),
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Icon(Icons.sports_basketball, color: Colors.white70, size: 20),
-                      const SizedBox(width: 6),
-                      const Text('Control de Asistencia',
-                          style: TextStyle(color: Colors.white70, fontSize: 13)),
+                      Row(
+                        children: [
+                          const Icon(Icons.sports_basketball,
+                              color: Colors.white60, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            _fechaHoy(),
+                            style: const TextStyle(
+                                color: Colors.white60, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Hola, $nombre 👋',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Control de Asistencia Deportiva',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text('Hola, $nombre 👋',
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  // ── stats ─────────────────────────────────────────────────────────────────
   Widget _buildStats() {
     return Row(
       children: [
-        _StatCard(label: 'Categorías', value: _categorias,
-            icon: Icons.category, color: const Color(0xFF1565C0)),
+        _StatCard(
+          label: 'Categorías',
+          value: _categorias,
+          icon: Icons.category_rounded,
+          color: const Color(0xFF1565C0),
+        ),
         const SizedBox(width: 10),
-        _StatCard(label: 'Jugadores', value: _jugadores,
-            icon: Icons.people, color: const Color(0xFF2E7D32)),
+        _StatCard(
+          label: 'Jugadores',
+          value: _jugadores,
+          icon: Icons.people_rounded,
+          color: const Color(0xFF2E7D32),
+        ),
         const SizedBox(width: 10),
-        _StatCard(label: 'Sesiones', value: _sesiones,
-            icon: Icons.calendar_today, color: const Color(0xFFE65100)),
-      ],
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Accesos rápidos',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF212121))),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            _ActionTile(
-              icon: Icons.people,
-              label: 'Jugadores',
-              color: const Color(0xFF1565C0),
-              onTap: () => widget.onNavigate?.call(1),
-            ),
-            const SizedBox(width: 12),
-            _ActionTile(
-              icon: Icons.sports_basketball,
-              label: 'Sesiones',
-              color: const Color(0xFF2E7D32),
-              onTap: () => widget.onNavigate?.call(2),
-            ),
-            const SizedBox(width: 12),
-            _ActionTile(
-              icon: Icons.settings,
-              label: 'Config',
-              color: const Color(0xFFE65100),
-              onTap: () => widget.onNavigate?.call(3),
-            ),
-          ],
+        _StatCard(
+          label: 'Sesiones',
+          value: _sesiones,
+          icon: Icons.event_note_rounded,
+          color: const Color(0xFFE65100),
         ),
       ],
     );
   }
 
+  // ── quick actions ─────────────────────────────────────────────────────────
+  Widget _buildQuickActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle(title: 'Accesos rápidos'),
+        const SizedBox(height: 12),
+        // Fila superior: botón grande de Jugadores + botón grande de Sesiones
+        Row(
+          children: [
+            _ActionCard(
+              icon: Icons.people_rounded,
+              label: 'Jugadores',
+              subtitle: 'Ver plantel',
+              color: const Color(0xFF1565C0),
+              onTap: () => widget.onNavigate?.call(1),
+            ),
+            const SizedBox(width: 12),
+            _ActionCard(
+              icon: Icons.sports_basketball_rounded,
+              label: 'Sesiones',
+              subtitle: 'Entrenamientos',
+              color: const Color(0xFF2E7D32),
+              onTap: () => widget.onNavigate?.call(2),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Fila inferior: botón ancho de Configuración
+        _ActionCardWide(
+          icon: Icons.tune_rounded,
+          label: 'Configuración',
+          subtitle: 'Categorías y ajustes del sistema',
+          color: const Color(0xFFE65100),
+          onTap: () => widget.onNavigate?.call(3),
+        ),
+      ],
+    );
+  }
+
+  // ── últimas sesiones ──────────────────────────────────────────────────────
   Widget _buildUltimasSesiones() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,11 +313,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Últimas sesiones',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF212121))),
+            _SectionTitle(title: 'Últimas sesiones'),
             TextButton(
               onPressed: () => widget.onNavigate?.call(2),
-              child: const Text('Ver todas'),
+              child: const Text('Ver todas',
+                  style: TextStyle(color: Color(0xFFE65100))),
             ),
           ],
         ),
@@ -210,12 +328,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Componentes
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE65100),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Tarjeta de estadística ────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String label;
   final int value;
   final IconData icon;
   final Color color;
-  const _StatCard({required this.label, required this.value, required this.icon, required this.color});
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -224,20 +382,33 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.06), blurRadius: 8, offset: const Offset(0, 2))],
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: color.withValues(alpha:0.1), shape: BoxShape.circle),
-              child: Icon(icon, color: color, size: 22),
-            ),
+            Icon(icon, color: color, size: 26),
             const SizedBox(height: 8),
-            Text('$value', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+            Text(
+              '$value',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey), textAlign: TextAlign.center),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
@@ -245,12 +416,20 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _ActionTile extends StatelessWidget {
+// ── Botón de acción cuadrado ──────────────────────────────────────────────
+class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String subtitle;
   final Color color;
   final VoidCallback onTap;
-  const _ActionTile({required this.icon, required this.label, required this.color, required this.onTap});
+  const _ActionCard({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -258,17 +437,46 @@ class _ActionTile extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 18),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 14),
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: color.withValues(alpha:0.35), blurRadius: 8, offset: const Offset(0, 3))],
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.35),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: Colors.white, size: 28),
-              const SizedBox(height: 6),
-              Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: Colors.white, size: 22),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.75),
+                  fontSize: 11,
+                ),
+              ),
             ],
           ),
         ),
@@ -277,6 +485,79 @@ class _ActionTile extends StatelessWidget {
   }
 }
 
+// ── Botón de acción ancho ────────────────────────────────────────────────
+class _ActionCardWide extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+  const _ActionCardWide({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Icon(Icons.arrow_forward_ios_rounded,
+                size: 16, color: color.withOpacity(0.6)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tile de sesión ─────────────────────────────────────────────────────────
 class _SesionTile extends StatelessWidget {
   final Map sesion;
   const _SesionTile({required this.sesion});
@@ -287,46 +568,96 @@ class _SesionTile extends StatelessWidget {
     final total     = int.tryParse('${sesion['total_asistencias'] ?? 0}') ?? 0;
     final pct       = total > 0 ? presentes / total : 0.0;
 
+    final Color statusColor = pct >= 0.8
+        ? const Color(0xFF2E7D32)
+        : pct >= 0.5
+            ? const Color(0xFFF57C00)
+            : const Color(0xFFC62828);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.05), blurRadius: 6, offset: const Offset(0, 2))],
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE65100).withValues(alpha:0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.sports_basketball, color: Color(0xFFE65100), size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${sesion['categoria_nombre']} — ${sesion['dia_semana']}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                Text('${sesion['fecha']}  ·  ${sesion['hora_inicio']}',
-                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
             children: [
-              Text('$presentes/$total',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              Text('${(pct * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: pct >= 0.8 ? Colors.green : pct >= 0.5 ? Colors.orange : Colors.red)),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE65100).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.sports_basketball_rounded,
+                    color: Color(0xFFE65100), size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${sesion['categoria_nombre']} · ${sesion['dia_semana']}',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    Text(
+                      '${sesion['fecha']}  ·  ${sesion['hora_inicio']}',
+                      style: const TextStyle(
+                          color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$presentes/$total',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${(pct * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: statusColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
+          ),
+          const SizedBox(height: 10),
+          // Barra de progreso
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: pct,
+              minHeight: 5,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+            ),
           ),
         ],
       ),

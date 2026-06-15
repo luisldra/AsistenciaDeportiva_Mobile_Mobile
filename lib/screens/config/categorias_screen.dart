@@ -17,6 +17,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> with SingleTickerPr
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 2, vsync: this);
+    _tabCtrl.addListener(() => setState(() {}));
     _load();
   }
 
@@ -151,7 +152,17 @@ class _CategoriasScreenState extends State<CategoriasScreen> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configuración'),
-        bottom: TabBar(controller: _tabCtrl, tabs: const [Tab(text: 'Categorías'), Tab(text: 'Horarios')]),
+        bottom: TabBar(
+        controller: _tabCtrl,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white60,
+        indicatorColor: Colors.white,
+        indicatorWeight: 3,
+        tabs: const [
+          Tab(text: 'Categorías'),
+          Tab(text: 'Horarios'),
+        ],
+      ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

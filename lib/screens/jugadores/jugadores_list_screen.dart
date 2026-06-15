@@ -26,7 +26,12 @@ class _JugadoresListScreenState extends State<JugadoresListScreen> {
       final cats = await ApiService.get('/categorias') as List;
       final path = _categoriaFiltro != null ? '/jugadores?categoria_id=$_categoriaFiltro' : '/jugadores';
       final jugs = await ApiService.get(path) as List;
-      if (mounted) setState(() { _categorias = cats; _jugadores = jugs; _loading = false; });
+      if (mounted) setState(() {
+      final seen = <dynamic>{};
+      _categorias = cats.where((c) => seen.add(c['id'])).toList();
+      _jugadores  = List.from(jugs);
+      _loading    = false;
+    });
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
