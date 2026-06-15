@@ -12,23 +12,20 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _categorias = 0;
-  int _jugadores = 0;
-  int _sesiones = 0;
+  int _categorias      = 0;
+  int _jugadores       = 0;
+  int _sesiones        = 0;
   List _ultimasSesiones = [];
-  bool _loading = true;
+  bool _loading        = true;
 
   @override
-  void initState() {
-    super.initState();
-    _load();
-  }
+  void initState() { super.initState(); _load(); }
 
   Future<void> _load() async {
     try {
       final cats = await ApiService.get('/categorias') as List;
-      final jugs = await ApiService.get('/jugadores') as List;
-      final ses  = await ApiService.get('/sesiones')  as List;
+      final jugs = await ApiService.get('/jugadores')  as List;
+      final ses  = await ApiService.get('/sesiones')   as List;
       if (mounted) {
         setState(() {
           _categorias      = cats.length;
@@ -54,17 +51,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (mounted) Navigator.pushReplacementNamed(context, '/login');
   }
 
-  // ── helpers ──────────────────────────────────────────────────────────────
   String _fechaHoy() {
-    const dias   = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
-    const meses  = ['enero','febrero','marzo','abril','mayo','junio',
-                    'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const dias  = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
     final now = DateTime.now();
     final dia = dias[now.weekday - 1];
     return '${dia[0].toUpperCase()}${dia.substring(1)}, ${now.day} de ${meses[now.month - 1]}';
   }
 
-  // ── build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final usuario = context.watch<AuthProvider>().usuario;
@@ -101,7 +96,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ── skeleton while loading ────────────────────────────────────────────────
   Widget _buildSkeleton() {
     return Column(
       children: [
@@ -140,7 +134,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ── header ────────────────────────────────────────────────────────────────
   Widget _buildHeader(String nombre) {
     return SliverAppBar(
       expandedHeight: 180,
@@ -165,13 +158,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           child: Stack(
             children: [
-              // Decoración de fondo: círculos sutiles
               Positioned(
-                right: -30,
-                top: -30,
+                right: -30, top: -30,
                 child: Container(
-                  width: 160,
-                  height: 160,
+                  width: 160, height: 160,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white.withOpacity(0.06),
@@ -179,11 +169,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Positioned(
-                right: 40,
-                bottom: -20,
+                right: 40, bottom: -20,
                 child: Container(
-                  width: 90,
-                  height: 90,
+                  width: 90, height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white.withOpacity(0.05),
@@ -202,30 +190,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const Icon(Icons.sports_basketball,
                               color: Colors.white60, size: 16),
                           const SizedBox(width: 6),
-                          Text(
-                            _fechaHoy(),
-                            style: const TextStyle(
-                                color: Colors.white60, fontSize: 12),
-                          ),
+                          Text(_fechaHoy(),
+                              style: const TextStyle(
+                                  color: Colors.white60, fontSize: 12)),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        'Hola, $nombre 👋',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
+                      Text('Hola, $nombre 👋',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.3,
+                          )),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Control de Asistencia Deportiva',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13),
-                      ),
+                      const Text('Control de Asistencia Deportiva',
+                          style: TextStyle(color: Colors.white70, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -237,42 +217,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ── stats ─────────────────────────────────────────────────────────────────
   Widget _buildStats() {
     return Row(
       children: [
-        _StatCard(
-          label: 'Categorías',
-          value: _categorias,
-          icon: Icons.category_rounded,
-          color: const Color(0xFF1565C0),
-        ),
+        _StatCard(label: 'Categorías', value: _categorias,
+            icon: Icons.category_rounded,   color: const Color(0xFF1565C0)),
         const SizedBox(width: 10),
-        _StatCard(
-          label: 'Jugadores',
-          value: _jugadores,
-          icon: Icons.people_rounded,
-          color: const Color(0xFF2E7D32),
-        ),
+        _StatCard(label: 'Jugadores',  value: _jugadores,
+            icon: Icons.people_rounded,     color: const Color(0xFF2E7D32)),
         const SizedBox(width: 10),
-        _StatCard(
-          label: 'Sesiones',
-          value: _sesiones,
-          icon: Icons.event_note_rounded,
-          color: const Color(0xFFE65100),
-        ),
+        _StatCard(label: 'Sesiones',   value: _sesiones,
+            icon: Icons.event_note_rounded, color: const Color(0xFFE65100)),
       ],
     );
   }
 
-  // ── quick actions ─────────────────────────────────────────────────────────
   Widget _buildQuickActions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(title: 'Accesos rápidos'),
+        const _SectionTitle(title: 'Accesos rápidos'),
         const SizedBox(height: 12),
-        // Fila superior: botón grande de Jugadores + botón grande de Sesiones
         Row(
           children: [
             _ActionCard(
@@ -293,7 +258,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        // Fila inferior: botón ancho de Configuración
         _ActionCardWide(
           icon: Icons.tune_rounded,
           label: 'Configuración',
@@ -305,7 +269,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ── últimas sesiones ──────────────────────────────────────────────────────
   Widget _buildUltimasSesiones() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +276,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _SectionTitle(title: 'Últimas sesiones'),
+            const _SectionTitle(title: 'Últimas sesiones'),
             TextButton(
               onPressed: () => widget.onNavigate?.call(2),
               child: const Text('Ver todas',
@@ -329,7 +292,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Componentes
+// Helpers globales de formato
+// ═══════════════════════════════════════════════════════════════════════════
+class DashboardHelpers {
+  static String formatFecha(String? raw) {
+    if (raw == null) return '';
+    try {
+      final d = DateTime.parse(raw);
+      const meses = ['ene','feb','mar','abr','may','jun',
+                     'jul','ago','sep','oct','nov','dic'];
+      return '${d.day} ${meses[d.month - 1]} ${d.year}';
+    } catch (_) { return raw; }
+  }
+
+  static String formatHora(String? raw) {
+    if (raw == null) return '';
+    try {
+      final parts = raw.split(':');
+      int h   = int.parse(parts[0]);
+      final m = parts[1];
+      final ampm = h >= 12 ? 'PM' : 'AM';
+      h = h > 12 ? h - 12 : (h == 0 ? 12 : h);
+      return '$h:$m $ampm';
+    } catch (_) { return raw; }
+  }
+
+  static Color catColor(String? cat) {
+    const mapa = {
+      'Sub-12':  Color(0xFF1565C0),
+      'Sub-15':  Color(0xFF2E7D32),
+      'Juvenil': Color(0xFF6A1B9A),
+      'Senior':  Color(0xFF00838F),
+    };
+    if (cat == null) return const Color(0xFF1565C0);
+    if (mapa.containsKey(cat)) return mapa[cat]!;
+    const colores = [
+      Color(0xFF1565C0), Color(0xFF2E7D32),
+      Color(0xFF6A1B9A), Color(0xFF00838F),
+      Color(0xFFE65100), Color(0xFFC62828),
+    ];
+    final hash = cat.codeUnits.fold(0, (a, b) => a * 31 + b);
+    return colores[hash.abs() % colores.length];
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Widgets internos
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _SectionTitle extends StatelessWidget {
@@ -341,39 +349,30 @@ class _SectionTitle extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 4,
-          height: 20,
+          width: 4, height: 20,
           decoration: BoxDecoration(
             color: const Color(0xFFE65100),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
         const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
+        Text(title, style: const TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF1A1A1A),
+        )),
       ],
     );
   }
 }
 
-// ── Tarjeta de estadística ────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String label;
   final int value;
   final IconData icon;
   final Color color;
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
+  const _StatCard({required this.label, required this.value,
+      required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -383,32 +382,18 @@ class _StatCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: color.withOpacity(0.12),
+              blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 26),
             const SizedBox(height: 8),
-            Text(
-              '$value',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
+            Text('$value', style: TextStyle(fontSize: 28,
+                fontWeight: FontWeight.bold, color: color)),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
+            Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -416,20 +401,14 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Botón de acción cuadrado ──────────────────────────────────────────────
 class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String subtitle;
   final Color color;
   final VoidCallback onTap;
-  const _ActionCard({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
+  const _ActionCard({required this.icon, required this.label,
+      required this.subtitle, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -441,13 +420,8 @@ class _ActionCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: color.withOpacity(0.35),
+                blurRadius: 10, offset: const Offset(0, 4))],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,22 +435,11 @@ class _ActionCard extends StatelessWidget {
                 child: Icon(icon, color: Colors.white, size: 22),
               ),
               const SizedBox(height: 14),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(label, style: const TextStyle(color: Colors.white,
+                  fontSize: 15, fontWeight: FontWeight.bold)),
               const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.75),
-                  fontSize: 11,
-                ),
-              ),
+              Text(subtitle, style: TextStyle(
+                  color: Colors.white.withOpacity(0.75), fontSize: 11)),
             ],
           ),
         ),
@@ -485,20 +448,14 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-// ── Botón de acción ancho ────────────────────────────────────────────────
 class _ActionCardWide extends StatelessWidget {
   final IconData icon;
   final String label;
   final String subtitle;
   final Color color;
   final VoidCallback onTap;
-  const _ActionCardWide({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
+  const _ActionCardWide({required this.icon, required this.label,
+      required this.subtitle, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -511,13 +468,8 @@ class _ActionCardWide extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04),
+              blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
@@ -533,18 +485,10 @@ class _ActionCardWide extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
+                Text(label, style: TextStyle(fontSize: 15,
+                    fontWeight: FontWeight.bold, color: color)),
+                Text(subtitle, style: const TextStyle(
+                    fontSize: 12, color: Colors.grey)),
               ],
             ),
             const Spacer(),
@@ -574,6 +518,9 @@ class _SesionTile extends StatelessWidget {
             ? const Color(0xFFF57C00)
             : const Color(0xFFC62828);
 
+    final categoria = sesion['categoria_nombre'] as String?;
+    final color     = DashboardHelpers.catColor(categoria);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -581,11 +528,8 @@ class _SesionTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
+          BoxShadow(color: color.withOpacity(0.08),
+              blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -593,29 +537,59 @@ class _SesionTile extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 44, height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE65100).withOpacity(0.1),
+                  color: color.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.sports_basketball_rounded,
-                    color: Color(0xFFE65100), size: 22),
+                child: Icon(Icons.sports_basketball_rounded, color: color, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${sesion['categoria_nombre']} · ${sesion['dia_semana']}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 14),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(categoria ?? '',
+                              style: TextStyle(fontSize: 11,
+                                  fontWeight: FontWeight.w600, color: color)),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(sesion['dia_semana'] ?? '',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey)),
+                      ],
                     ),
-                    Text(
-                      '${sesion['fecha']}  ·  ${sesion['hora_inicio']}',
-                      style: const TextStyle(
-                          color: Colors.grey, fontSize: 12),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today_rounded,
+                            size: 11, color: Colors.grey.shade500),
+                        const SizedBox(width: 4),
+                        Text(
+                          DashboardHelpers.formatFecha(sesion['fecha'] as String?),
+                          style: TextStyle(fontSize: 12,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(Icons.access_time_rounded,
+                            size: 11, color: Colors.grey.shade500),
+                        const SizedBox(width: 4),
+                        Text(
+                          DashboardHelpers.formatHora(sesion['hora_inicio'] as String?),
+                          style: TextStyle(fontSize: 12,
+                              color: Colors.grey.shade600),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -623,11 +597,9 @@ class _SesionTile extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    '$presentes/$total',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
+                  Text('$presentes/$total',
+                      style: TextStyle(fontWeight: FontWeight.bold,
+                          fontSize: 15, color: statusColor)),
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 2),
@@ -636,12 +608,9 @@ class _SesionTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${(pct * 100).toStringAsFixed(0)}%',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: statusColor,
-                      ),
+                      total > 0 ? '${(pct * 100).toStringAsFixed(0)}%' : '—',
+                      style: TextStyle(fontSize: 11,
+                          fontWeight: FontWeight.w600, color: statusColor),
                     ),
                   ),
                 ],
@@ -649,7 +618,6 @@ class _SesionTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          // Barra de progreso
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
