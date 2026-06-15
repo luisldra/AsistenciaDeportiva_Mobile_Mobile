@@ -37,6 +37,19 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  Future<void> setSession(String token, Map<String, dynamic> usuario) async {
+    _token = token;
+    _usuario = usuario;
+    _isAuthenticated = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', _token!);
+    await prefs.setString('usuario_nombre', _usuario!['nombre']);
+    await prefs.setString('usuario_email', _usuario!['email']);
+    await prefs.setInt('usuario_id', _usuario!['id']);
+    notifyListeners();
+  }
+
   Future<void> register(String nombre, String email, String password) async {
     await ApiService.post('/register', {'nombre': nombre, 'email': email, 'password': password});
   }

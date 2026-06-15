@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../services/google_auth_service.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _loading = false;
+  bool _loadingGoogle = false; 
   bool _obscure = true;
 
   @override
@@ -35,6 +37,28 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo conectar al servidor'), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  // método para login con Google
+  Future<void> _loginWithGoogle() async {
+    setState(() => _loadingGoogle = true);
+    try {
+      final result = await GoogleAuthService.signInWithGoogle();
+      if (result != null) {
+        context.read<AuthProvider>().setSession(result['token'], result['usuario']);
+        if (mounted) Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo iniciar sesión con Google'), backgroundColor: Colors.red),
+        );
+      }
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al conectar con Google'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingGoogle = false);
     }
   }
 
@@ -115,6 +139,37 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : const Text('Iniciar sesión'),
                           ),
                           const SizedBox(height: 12),
+
+                          // ← NUEVO: divisor
+                          const Row(children: [
+                            Expanded(child: Divider()),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('o', style: TextStyle(color: Colors.grey)),
+                            ),
+                            Expanded(child: Divider()),
+                          ]),
+                          const SizedBox(height: 12),
+
+                          // ← NUEVO: botón Google
+                          OutlinedButton.icon(
+                            onPressed: _loadingGoogle ? null : _loginWithGoogle,
+                            icon: _loadingGoogle
+                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                : Image.network(
+                                    'https://www.google.com/favicon.ico',
+                                    height: 20,
+                                    width: 20,
+                                  ),
+                            label: const Text('Continuar con Google'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF212121),
+                              side: const BorderSide(color: Colors.grey),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
                           TextButton(
                             onPressed: () => Navigator.pushNamed(context, '/register'),
                             child: const Text('¿No tienes cuenta? Regístrate'),
